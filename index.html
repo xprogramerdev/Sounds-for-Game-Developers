@@ -107,9 +107,11 @@
                 soundList.innerHTML = "";
                 allSounds = [];
 
+                const audioExtensions = /\.(mp3|wav|ogg|flac|aac)$/i;
+
                 files.forEach(file => {
-                    if (file.name.endsWith(".mp3") || file.name.endsWith(".wav")) {
-                        let soundName = file.name.replace(/\.(mp3|wav)$/i, "");
+                    if (audioExtensions.test(file.name)) {
+                        let soundName = file.name.replace(audioExtensions, "");
                         let listItem = document.createElement("li");
                         listItem.textContent = soundName;
                         listItem.onclick = () => playSound(file.download_url, soundName);
