@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>World of Sound</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #121212;
+            color: white;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: #1e1e1e;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+        }
+        h1 {
+            color: #ff9900;
+        }
+        #searchBox {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        li {
+            background: #333;
+            padding: 12px;
+            margin: 5px 0;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            transition: background 0.3s;
+        }
+        li:hover {
+            background: #444;
+        }
+        .audio-controls {
+            display: none;
+            margin-top: 20px;
+        }
+        .btn {
+            background: #ff9900;
+            color: black;
+            padding: 8px 12px;
+            border-radius: 5px;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        .btn:hover {
+            background: #e68a00;
+        }
+        .direct-link {
+            font-size: 14px;
+            color: #66ccff;
+            word-break: break-all;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>World of Sound</h1>
+        <input type="text" id="searchBox" placeholder="Search sounds..." oninput="searchSounds()">
+        <ul id="soundList">Loading...</ul>
+        <div class="audio-controls" id="audioControls">
+            <audio id="audioPlayer" controls></audio>
+            <a id="downloadBtn" class="btn" download>Download</a>
+            <button id="copyBtn" class="btn">Copy Link</button>
+            <p id="directLink" class="direct-link"></p>
+        </div>
+    </div>
+
+    <script>
+        const username = "xprogramerdev";
+        const repo = "Sounds-for-Game-Developers";
+        const branch = "main";
+        let allSounds = [];
+
+        async function fetchSounds() {
+            const url = `https://api.github.com/repos/${username}/${repo}/contents/?ref=${branch}`;
+            
+            try {
+                let response = await fetch(url);
+                let files = await response.json();
+                let soundList = document.getElementById("soundList");
+                soundList.innerHTML = "";
+                allSounds = [];
+
+                files.forEach(file => {
+                    if (file.name.endsWith(".mp3") || file.name.endsWith(".wav")) {
+                        let soundName = file.name.replace(/\.(mp3|wav)$/i, "");
+                        let listItem = document.createElement("li");
+                        listItem.textContent = soundName;
+                        listItem.onclick = () => playSound(file.download_url, soundName);
+                        soundList.appendChild(listItem);
+                        allSounds.push({ name: soundName, url: file.download_url, element: listItem });
+                    }
+                });
+            } catch (error) {
+                document.getElementById("soundList").innerHTML = "Failed to load sounds.";
+            }
+        }
+
+        function searchSounds() {
+            let query = document.getElementById("searchBox").value.toLowerCase();
+            allSounds.forEach(sound => {
+                sound.element.style.display = sound.name.toLowerCase().includes(query) ? "flex" : "none";
+            });
+        }
+
+        function playSound(url, name) {
+            let audioPlayer = document.getElementById("audioPlayer");
+            let downloadBtn = document.getElementById("downloadBtn");
+            let copyBtn = document.getElementById("copyBtn");
+            let audioControls = document.getElementById("audioControls");
+            let directLink = document.getElementById("directLink");
+
+            audioPlayer.src = url;
+            downloadBtn.href = url;
+            downloadBtn.download = name;
+            directLink.textContent = url;
+            directLink.style.display = "block";
+
+            copyBtn.onclick = () => copyToClipboard(url);
+            audioControls.style.display = "block";
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert("Link copied!");
+            });
+        }
+
+        fetchSounds();
+    </script>
+</body>
+</html>Enter file contents here
